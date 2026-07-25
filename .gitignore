@@ -1,0 +1,23 @@
+# Python virtual environment
+.venv/
+
+# Environment variables and API keys
+.env
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Pytest cache
+.pytest_cache/
+
+# DeepEval local files
+.deepeval/
+
+# Generated reports
+reports/*
+!reports/.gitkeep
+
+# Editor files
+.vscode/
+.idea/
