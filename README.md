@@ -12,7 +12,6 @@ This demonstrated that answer relevancy does not measure every aspect of
 response quality. A response can be related to the question without fully
 answering it, so production evaluations require multiple complementary metrics.
 
-
 ## Day 2: Correctness and Completeness
 
 I added custom G-Eval metrics for answer correctness and completeness.
