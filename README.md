@@ -85,3 +85,35 @@ A strong RAG evaluation suite should identify whether the failure came from:
 * The evaluator itself
 
 Day 4 demonstrated that reliable AI testing requires more than checking the final answer. It requires tracing every claim back to evidence and diagnosing which system component caused the failure.
+
+
+## Day 5 – Retrieval Precision, Recall, and Ranking Quality
+
+Day 5 focused on diagnosing retriever quality in RAG systems using DeepEval.
+
+### Metrics
+
+- **Contextual Recall** checks whether the retrieved context contains all evidence needed to support the expected answer.
+- **Contextual Relevancy** checks whether the retrieved content is relevant to the user’s question.
+- **Contextual Precision** checks whether relevant chunks are ranked above irrelevant chunks.
+
+### Controlled Cases
+
+Tested retrieval scenarios with:
+
+- Complete and relevant evidence
+- Missing required evidence
+- Relevant evidence mixed with noise
+- Relevant chunks ranked below irrelevant chunks
+- Partially useful retrieval containing both missing evidence and noise
+
+### Key Lessons
+
+- One relevant chunk does not prove that retrieval is complete.
+- Missing evidence primarily lowers contextual recall.
+- Irrelevant chunks primarily lower contextual relevancy.
+- Poor chunk ordering lowers contextual precision.
+- A retriever may pass precision while failing recall and relevancy.
+- `expected_output` should contain atomic, independently testable facts.
+- Unexpected evaluator behavior should be treated as a calibration finding.
+- Multiple retrieval metrics are needed to identify the true root cause of a RAG failure.
