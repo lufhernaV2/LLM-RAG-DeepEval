@@ -117,3 +117,38 @@ Tested retrieval scenarios with:
 - `expected_output` should contain atomic, independently testable facts.
 - Unexpected evaluator behavior should be treated as a calibration finding.
 - Multiple retrieval metrics are needed to identify the true root cause of a RAG failure.
+
+
+## Day 6 – End-to-End RAG Evaluation
+
+Day 6 focused on diagnosing whether RAG failures came from the retriever or the generator.
+
+### Metrics Used
+
+* `AnswerRelevancyMetric` – checks whether the answer addresses the question.
+* `FaithfulnessMetric` – checks whether the answer aligns with retrieved evidence.
+* `ContextualRecallMetric` – checks whether required evidence is missing.
+* `ContextualRelevancyMetric` – checks for irrelevant retrieval noise.
+* `ContextualPrecisionMetric` – checks whether useful chunks are ranked highly.
+
+### Key Findings
+
+```text
+Low recall + high faithfulness
+→ Missing retrieval evidence, but the generator stayed grounded.
+
+High recall + low faithfulness
+→ Retrieval succeeded, but the generator misused the evidence.
+
+Low relevancy
+→ Too much retrieval noise.
+
+Low precision
+→ Relevant chunks were ranked too low.
+```
+
+A custom deterministic `BaseMetric` was also created to fail unsupported material policy claims. Known aliases such as `restocking fee`, `return fee`, and `return charge` were used to improve coverage.
+
+### Main Lesson
+
+Use LLM-based metrics for semantic diagnosis and deterministic checks for strict business rules and CI gates.
