@@ -152,3 +152,27 @@ A custom deterministic `BaseMetric` was also created to fail unsupported materia
 ### Main Lesson
 
 Use LLM-based metrics for semantic diagnosis and deterministic checks for strict business rules and CI gates.
+
+
+## Day 7 – Practical Evaluation Datasets
+
+Day 7 focused on organizing reusable RAG test scenarios with DeepEval Goldens and EvaluationDataset.
+
+Key Concepts
+A Golden stores stable test data such as the input, expected output, and metadata.
+An EvaluationDataset groups multiple Goldens into a reusable regression suite.
+An LLMTestCase combines Golden data with runtime values such as actual_output and retrieval_context.
+Practical Flow
+Golden
++ runtime answer
++ runtime retrieval context
+= LLMTestCase
+What Was Built
+A Northstar policy dataset with three Goldens.
+Metadata for category and risk.
+Dataset integrity tests.
+Validation for required Golden fields.
+A test that converts a Golden into an LLMTestCase.
+Main Lesson
+
+Evaluation datasets let the same important scenarios be rerun after prompt, model, retriever, or application changes. This creates a repeatable AI regression-testing foundation.
