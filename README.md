@@ -176,3 +176,24 @@ A test that converts a Golden into an LLMTestCase.
 Main Lesson
 
 Evaluation datasets let the same important scenarios be rerun after prompt, model, retriever, or application changes. This creates a repeatable AI regression-testing foundation.
+
+## Day 8 – Reusable Dataset Evaluation Runner
+
+Day 8 focused on converting reusable Goldens into completed `LLMTestCase` objects.
+
+### What Was Built
+
+- A simulated RAG application that returns an answer and retrieval context.
+- A `RAGResult` dataclass for storing runtime results.
+- A reusable function that converts a Golden into an `LLMTestCase`.
+- A dataset runner that processes every Golden automatically.
+- Tests confirming that runtime fields and metadata are preserved.
+
+### Practical Flow
+
+```text
+Golden
+→ Run RAG application
+→ Capture answer and retrieved chunks
+→ Build LLMTestCase
+→ Run evaluations
