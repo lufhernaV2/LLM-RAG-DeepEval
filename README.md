@@ -197,3 +197,35 @@ Golden
 → Capture answer and retrieved chunks
 → Build LLMTestCase
 → Run evaluations
+
+## Day 9 – Batch Evaluation and Regression Detection
+
+Day 9 focused on running multiple RAG test cases through a reusable DeepEval metric pipeline.
+
+### What Was Built
+
+- Batch evaluation using `evaluate()`
+- `AnswerRelevancyMetric`
+- `FaithfulnessMetric`
+- Sequential metric execution for easier debugging
+- A controlled regression test
+
+### Results
+
+**Healthy baseline**
+
+- 3 tests
+- 100% pass rate
+
+**Controlled regression**
+
+- Answer Relevancy: `1.0` — PASS
+- Faithfulness: `0.50` — FAIL
+- Overall pass rate: `66.67%`
+
+### Key Lessons
+
+- Batch evaluation allows an entire Golden dataset to be tested consistently.
+- A response can be highly relevant while still being unfaithful to retrieved evidence.
+- Aggregate averages can hide individual critical failures.
+- A useful regression suite should confirm that good behavior passes and known bad behavior fails.
