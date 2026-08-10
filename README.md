@@ -229,3 +229,37 @@ Day 9 focused on running multiple RAG test cases through a reusable DeepEval met
 - A response can be highly relevant while still being unfaithful to retrieved evidence.
 - Aggregate averages can hide individual critical failures.
 - A useful regression suite should confirm that good behavior passes and known bad behavior fails.
+
+
+## Day 10 – AI Quality Gates
+
+### What I Learned
+
+* Used DeepEval's `assert_test()` to turn evaluation metrics into automated pass/fail quality gates.
+* Learned the difference between **measuring AI quality** and **enforcing AI quality requirements**.
+* Created a Faithfulness gate with a minimum threshold of `0.7`.
+* Verified that a known-bad response correctly fails the quality gate.
+* Verified that a supported response correctly passes the quality gate.
+* Connected the existing Golden dataset and RAG evaluation runner to parametrized pytest tests.
+* Added multiple requirements to the same quality gate:
+
+  * Answer Relevancy
+  * Faithfulness
+* Confirmed that every Golden must pass individually instead of relying only on aggregate metric averages.
+* Created a controlled regression where:
+
+  * Answer Relevancy = `1.0`
+  * Faithfulness = `0.5`
+  * Overall test = `FAILED`
+* Learned that a response can directly answer the user's question while still contradicting retrieved evidence.
+* Separated **release quality gates** from **metric calibration tests**.
+
+### Key Takeaway
+
+AI evaluation should not stop at reporting scores.
+
+A practical AI QA framework should enforce minimum quality requirements so that critical regressions can automatically fail a test before release.
+
+Current evaluation flow:
+
+Golden → RAG Application → LLMTestCase → Metrics → Quality Gate → PASS / FAIL
