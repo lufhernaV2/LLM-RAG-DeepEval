@@ -264,3 +264,44 @@ A practical AI QA framework should enforce minimum quality requirements so that 
 Current evaluation flow:
 
 Golden → RAG Application → LLMTestCase → Metrics → Quality Gate → PASS / FAIL
+
+## Day 11 – Risk-Based AI Quality Gates
+
+### What I Learned
+
+* Used Golden `additional_metadata` to classify evaluation scenarios by business risk.
+* Validated that every Golden contains a supported risk level:
+
+  * `high`
+  * `medium`
+  * `low`
+* Created a deterministic threshold policy:
+
+  * High risk → Faithfulness threshold `0.90`
+  * Medium risk → Faithfulness threshold `0.70`
+  * Low risk → Faithfulness threshold `0.60`
+* Connected each Golden's risk metadata to its Faithfulness evaluation threshold.
+* Built a risk-aware DeepEval quality gate using `FaithfulnessMetric` and `assert_test()`.
+* Confirmed that high-risk and medium-risk Goldens can use different evaluation requirements within the same dataset.
+* Learned that the **metric score** and the **business decision** are separate:
+
+  * Metric score = how well the AI performed
+  * Risk policy = how good the AI must be for that scenario
+* Proved that the same score can produce different release decisions:
+
+  * Score `0.80` with medium risk → PASS
+  * Score `0.80` with high risk → FAIL
+* Created a controlled high-risk regression where the AI incorrectly claimed there was no restocking fee.
+* Confirmed that the high-risk Golden automatically used the stricter `0.90` Faithfulness threshold and rejected the regression.
+* Created a calibration test to verify that the evaluator correctly detects known-bad high-risk responses.
+* Improved test maintainability by selecting Goldens by metadata category instead of relying on dataset order.
+
+### Key Takeaway
+
+AI quality requirements should reflect **business risk**, not use the same threshold for every scenario.
+
+A practical risk-aware evaluation flow now looks like:
+
+Golden → Risk Metadata → Threshold Policy → RAG Application → LLMTestCase → Evaluation Metric → Risk-Based Quality Gate → PASS / FAIL
+
+Higher-risk AI behavior can therefore require stricter quality standards and block a release even when lower-risk scenarios remain healthy.
