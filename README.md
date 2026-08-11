@@ -197,6 +197,7 @@ Golden
 → Capture answer and retrieved chunks
 → Build LLMTestCase
 → Run evaluations
+```
 
 ## Day 9 – Batch Evaluation and Regression Detection
 
