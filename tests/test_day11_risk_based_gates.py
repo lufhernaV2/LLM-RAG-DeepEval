@@ -5,7 +5,7 @@ from deepeval import assert_test
 from deepeval.metrics import FaithfulnessMetric
 
 from evaluation.rag_evaluation_runner import build_test_cases_from_goldens
-
+from evaluation.evaluation_policy import get_faithfulness_threshold
 
 @pytest.mark.parametrize("golden", northstar_policy_goldens)
 def test_goldens_have_valid_risk_metadata(golden):
@@ -13,14 +13,6 @@ def test_goldens_have_valid_risk_metadata(golden):
 
     assert risk in {"high", "medium", "low"}
 
-def get_faithfulness_threshold(risk):
-    thresholds = {
-        "high": 0.90,
-        "medium": 0.70,
-        "low": 0.60,
-    }
-
-    return thresholds[risk]
 
 @pytest.mark.parametrize(
     "risk, expected_threshold",

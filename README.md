@@ -305,3 +305,60 @@ A practical risk-aware evaluation flow now looks like:
 Golden → Risk Metadata → Threshold Policy → RAG Application → LLMTestCase → Evaluation Metric → Risk-Based Quality Gate → PASS / FAIL
 
 Higher-risk AI behavior can therefore require stricter quality standards and block a release even when lower-risk scenarios remain healthy.
+
+
+## Day 12 – Evaluation Policy Layer
+
+### What I Learned
+
+* Moved evaluation threshold logic out of individual tests and into a centralized policy module:
+
+  * `evaluation/evaluation_policy.py`
+* Created a single source of truth for risk-based evaluation requirements.
+* Defined reusable evaluation profiles for:
+
+  * High risk
+  * Medium risk
+  * Low risk
+* Centralized thresholds for:
+
+  * Answer Relevancy
+  * Faithfulness
+* Kept the existing `get_faithfulness_threshold()` helper for backward compatibility with earlier tests.
+* Added `get_evaluation_thresholds()` to retrieve the full evaluation policy for a given risk level.
+* Created `build_metrics_for_risk()` to automatically construct configured DeepEval metrics from the policy.
+* Moved evaluator configuration, including the `gpt-4.1-mini` model, into the policy layer.
+* Added deterministic tests to verify:
+
+  * Each risk level maps to the correct thresholds
+  * High-risk policies contain all required metrics
+  * DeepEval metric objects are created with the expected configuration
+* Updated the dataset quality gate so tests no longer hard-code metric thresholds.
+* Confirmed that Golden risk metadata now determines which evaluation policy is applied.
+* Temporarily changed the high-risk Faithfulness threshold from `0.90` to `0.95` and verified that the existing quality-gate tests automatically used the new requirement without changing the tests themselves.
+* Restored the intended policy and verified all policy tests still passed.
+
+### Current Risk Policy
+
+* High risk:
+
+  * Answer Relevancy >= `0.80`
+  * Faithfulness >= `0.90`
+* Medium risk:
+
+  * Answer Relevancy >= `0.70`
+  * Faithfulness >= `0.70`
+* Low risk:
+
+  * Answer Relevancy >= `0.60`
+  * Faithfulness >= `0.60`
+
+### Key Takeaway
+
+Evaluation tests should enforce quality standards, but they should not own those standards.
+
+By centralizing thresholds, evaluator configuration, and metric construction in an evaluation policy layer, the framework now has one source of truth for AI quality requirements.
+
+Current evaluation flow:
+
+Golden → Risk Metadata → Evaluation Policy → Configured Metrics → LLMTestCase → Quality Gate → PASS / FAIL
