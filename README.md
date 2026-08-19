@@ -443,3 +443,110 @@ The release should be blocked.
 Current evaluation flow:
 
 Golden → RAG Application → Evaluation Policy → DeepEval Metrics → Structured Results → Failure Analysis → Release Decision → Human-Readable Summary
+
+
+## Day 14 – Baseline Comparison & Regression Detection
+
+### What I Learned
+
+* Reused `CaseEvaluationResult` from Day 13 to represent both:
+
+  * Baseline evaluation results
+  * Current evaluation results
+* Learned the difference between:
+
+  * **Threshold checks** → Is the current score acceptable?
+  * **Baseline comparison** → Did the current score get worse?
+* Created `evaluation/regression_analysis.py` to centralize regression-analysis logic.
+* Added `calculate_score_delta()` to measure changes between baseline and current scores.
+* Used `pytest.approx()` for floating-point score comparisons.
+* Created an `EvaluationComparison` dataclass containing:
+
+  * `category`
+  * `risk`
+  * `metric_name`
+  * `baseline_score`
+  * `current_score`
+  * `delta`
+  * `regressed`
+* Added a regression tolerance of `0.05` to avoid treating very small score changes as meaningful regressions.
+* Confirmed that:
+
+  * Small score drops can be tolerated
+  * Larger score drops are classified as regressions
+* Created a helper to convert baseline and current `CaseEvaluationResult` objects into an `EvaluationComparison`.
+* Matched baseline and current evaluation results using:
+
+  * `category`
+  * `metric_name`
+* Avoided relying on list ordering when comparing evaluation runs.
+* Added helpers to identify:
+
+  * All regressions
+  * High-risk regressions
+* Built a regression summary that reports:
+
+  * Total metric comparisons
+  * Total regressions
+  * High-risk regressions
+  * Largest regression
+* Created a human-readable regression report showing baseline score, current score, score delta, risk, and metric.
+
+### Regression Example
+
+```text
+=== AI Evaluation Regression Summary ===
+
+Metric Comparisons: 3
+Regressions: 2
+High-Risk Regressions: 1
+
+Largest Regression:
+Category: opened_laptop_return
+Risk: high
+Metric: FaithfulnessMetric
+Baseline: 1.00
+Current: 0.80
+Delta: -0.20
+
+All Regressions:
+- opened_laptop_return | FaithfulnessMetric
+  Risk: high
+  Baseline: 1.00
+  Current: 0.80
+  Delta: -0.20
+
+- refund_method | AnswerRelevancyMetric
+  Risk: medium
+  Baseline: 0.90
+  Current: 0.82
+  Delta: -0.08
+```
+
+### Key Takeaway
+
+A passing quality gate does not necessarily mean AI quality has remained stable.
+
+For example:
+
+```text
+Threshold = 0.70
+Baseline = 1.00
+Current = 0.80
+```
+
+The current result can still pass its minimum quality requirement while representing a meaningful regression compared with the previous baseline.
+
+A practical AI QA framework should therefore use both:
+
+```text
+Quality Thresholds
+→ Protect minimum acceptable quality
+
+Baselines
+→ Protect against quality degradation over time
+```
+
+Current regression flow:
+
+Baseline Results → Current Results → Match by Category + Metric → Calculate Delta → Apply Regression Tolerance → Detect Regressions → Filter by Risk → Regression Summary
