@@ -1,0 +1,44 @@
+[
+  {
+    "category": "opened_laptop_return",
+    "risk": "high",
+    "metric_name": "AnswerRelevancyMetric",
+    "score": 1.0,
+    "threshold": 0.8
+  },
+  {
+    "category": "opened_laptop_return",
+    "risk": "high",
+    "metric_name": "FaithfulnessMetric",
+    "score": 1.0,
+    "threshold": 0.9
+  },
+  {
+    "category": "refund_method",
+    "risk": "medium",
+    "metric_name": "AnswerRelevancyMetric",
+    "score": 1.0,
+    "threshold": 0.7
+  },
+  {
+    "category": "refund_method",
+    "risk": "medium",
+    "metric_name": "FaithfulnessMetric",
+    "score": 1.0,
+    "threshold": 0.7
+  },
+  {
+    "category": "return_deadline",
+    "risk": "high",
+    "metric_name": "AnswerRelevancyMetric",
+    "score": 1.0,
+    "threshold": 0.8
+  },
+  {
+    "category": "return_deadline",
+    "risk": "high",
+    "metric_name": "FaithfulnessMetric",
+    "score": 1.0,
+    "threshold": 0.9
+  }
+]
