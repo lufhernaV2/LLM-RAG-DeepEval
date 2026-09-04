@@ -550,3 +550,116 @@ Baselines
 Current regression flow:
 
 Baseline Results → Current Results → Match by Category + Metric → Calculate Delta → Apply Regression Tolerance → Detect Regressions → Filter by Risk → Regression Summary
+
+## Day 15 – Persisted Evaluation Baselines
+
+### What I Learned
+
+- Created `evaluation/baseline_store.py` to manage evaluation baseline persistence.
+- Serialized `CaseEvaluationResult` objects into JSON-friendly dictionaries.
+- Deserialized stored dictionaries back into `CaseEvaluationResult` objects.
+- Added round-trip testing to verify evaluation data is preserved through serialization and deserialization.
+- Used Python's built-in `json` module to save evaluation results to disk.
+- Used pytest's `tmp_path` fixture to safely test file persistence without modifying real baseline files.
+- Created `save_baseline()` and `load_baseline()` helpers for reusable baseline storage.
+- Connected persisted baselines to the Day 14 regression comparison logic.
+- Confirmed that a baseline loaded from disk can detect meaningful score regressions in future evaluation runs.
+- Added baseline promotion rules so high-risk failing evaluation runs cannot become the new approved baseline.
+- Reused the existing release-decision logic instead of duplicating quality rules.
+- Generated a real Northstar baseline from the evaluation dataset and saved it to:
+  - `baselines/northstar_baseline.json`
+- Persisted 6 metric evaluation results across the 3 Northstar Goldens.
+- Simulated a future regression against the saved baseline and successfully detected a high-risk Faithfulness regression.
+
+### Regression Example
+
+```text
+=== AI Evaluation Regression Summary ===
+
+Metric Comparisons: 6
+Regressions: 1
+High-Risk Regressions: 1
+
+Largest Regression:
+Category: opened_laptop_return
+Risk: high
+Metric: FaithfulnessMetric
+Baseline: 1.00
+Current: 0.80
+Delta: -0.20 
+```
+
+## Day 16 — Regression-Aware Release Gates
+
+Extended the evaluation framework so baseline regressions can directly influence release decisions.
+
+### Implemented
+
+* Created `evaluation/release_decision.py`
+* Added regression-aware release blocking
+* Added structured `ReleaseDecision` containing:
+
+  * `blocked`
+  * `reasons`
+* Combined:
+
+  * high-risk threshold failures
+  * high-risk baseline regressions
+* Integrated the persisted Northstar baseline into the release decision flow
+* Added a human-readable unified release report
+
+### Key Lesson
+
+A result can still pass its minimum quality threshold while materially regressing from an approved baseline.
+
+Example:
+
+```text
+Baseline: 1.00
+Current: 0.92
+Threshold: 0.90
+
+Threshold Gate: PASS
+Regression Check: FAIL
+Final Release Decision: BLOCKED
+```
+
+Release decisions should therefore consider both:
+
+```text
+Absolute Quality
++
+Relative Quality Regression
+```
+
+The framework can now produce reports such as:
+
+```text
+Metric Evaluations: 6
+Threshold Failures: 1
+High-Risk Threshold Failures: 1
+Regressions: 1
+High-Risk Regressions: 1
+
+Release Decision: BLOCKED
+
+Reasons:
+- High-risk threshold failure: opened_laptop_return / FaithfulnessMetric
+- High-risk regression: opened_laptop_return / FaithfulnessMetric
+```
+
+### Current Evaluation Flow
+
+```text
+Evaluation Results
+      ↓
+Threshold Quality Gate ──────┐
+                             │
+Persisted Baseline           │
+      ↓                      │
+Regression Detection ────────┤
+                             ↓
+                    Unified Release Decision
+                             ↓
+                    Human-Readable Report
+```
