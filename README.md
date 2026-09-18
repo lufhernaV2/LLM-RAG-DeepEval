@@ -663,3 +663,97 @@ Regression Detection ────────┤
                              ↓
                     Human-Readable Report
 ```
+
+## Day 17 — Executable AI Evaluation Pipeline
+
+Converted the evaluation framework from a collection of individual components into a single executable AI quality-gate pipeline.
+
+### Implemented
+
+* Created `evaluation/evaluation_pipeline.py`
+* Added `run_evaluation_pipeline()`
+* Created structured `EvaluationPipelineResult`
+* Pipeline results now expose:
+
+  * current evaluation results
+  * baseline comparisons
+  * release decision
+  * human-readable report
+* Added process exit-code translation:
+
+  * `0` = release allowed
+  * `1` = release blocked
+* Created `scripts/run_quality_gate.py`
+* Added a command-line entry point:
+
+```powershell
+python -m scripts.run_quality_gate
+```
+
+* Connected the command to:
+
+  * Northstar Goldens
+  * simulated RAG execution
+  * fresh DeepEval evaluation
+  * centralized risk-based policy
+  * persisted baseline comparison
+  * regression-aware release decisions
+
+### Key Architecture
+
+```text
+Northstar Goldens
+      ↓
+RAG Application
+      ↓
+LLMTestCase Objects
+      ↓
+Risk-Based DeepEval Evaluation
+      ↓
+Structured Current Results
+      ↓
+Persisted Approved Baseline
+      ↓
+Regression Analysis
+      ↓
+Unified Release Decision
+      ↓
+Human-Readable Report
+      ↓
+Exit Code 0 / 1
+```
+
+### Key Lesson
+
+An evaluation framework becomes operationally useful when its individual components can be executed through one repeatable pipeline.
+
+The framework now supports both:
+
+```text
+Human signal:
+Release Decision: ALLOWED / BLOCKED
+
+Machine signal:
+Exit Code 0 / 1
+```
+
+This makes the evaluation system suitable for future CI/CD integration.
+
+### Fresh Northstar Run
+
+```text
+Metric Evaluations: 6
+Threshold Failures: 0
+High-Risk Threshold Failures: 0
+Regressions: 0
+High-Risk Regressions: 0
+
+Release Decision: ALLOWED
+```
+
+The command completed successfully with:
+
+```text
+Exit Code: 0
+```
+
