@@ -757,3 +757,140 @@ The command completed successfully with:
 Exit Code: 0
 ```
 
+## Day 18 — CI/CD AI Quality Gates with GitHub Actions
+
+Integrated the AI evaluation framework with GitHub Actions so quality checks now run automatically in CI.
+
+### Implemented
+
+* Created:
+
+```text
+.github/workflows/ai-quality-gate.yml
+```
+
+* Configured GitHub Actions to:
+
+  * check out the repository
+  * install Python 3.10
+  * install project dependencies
+  * run deterministic evaluation pipeline tests
+  * execute the live AI quality gate
+
+* Added cross-platform dependency handling for:
+
+```text
+pywin32
+```
+
+using:
+
+```text
+pywin32==312; sys_platform == "win32"
+```
+
+* Added `OPENAI_API_KEY` securely using GitHub Actions repository secrets.
+* Connected CI to:
+
+```bash
+python -m scripts.run_quality_gate
+```
+
+### CI Flow
+
+```text
+Code Push / Pull Request
+        ↓
+GitHub Actions
+        ↓
+Install Environment
+        ↓
+Run Deterministic Tests
+        ↓
+Run Fresh DeepEval Evaluation
+        ↓
+Apply Risk-Based Thresholds
+        ↓
+Compare Against Approved Baseline
+        ↓
+Detect Regressions
+        ↓
+Release Decision
+        ↓
+Exit Code 0 / 1
+        ↓
+GitHub PASS / FAIL
+```
+
+### Controlled Regression Test
+
+An intentional Faithfulness regression was introduced for:
+
+```text
+opened_laptop_return
+```
+
+The RAG application incorrectly claimed:
+
+```text
+"There is no restocking fee."
+```
+
+while the retrieval context stated that a 15% restocking fee applies.
+
+The CI quality gate correctly produced:
+
+```text
+Metric Evaluations: 6
+Threshold Failures: 1
+High-Risk Threshold Failures: 1
+Regressions: 1
+High-Risk Regressions: 1
+
+Release Decision: BLOCKED
+```
+
+The command returned:
+
+```text
+Exit Code: 1
+```
+
+which caused GitHub Actions to fail.
+
+### Recovery Test
+
+After restoring the correct RAG behavior, the same pipeline produced:
+
+```text
+Metric Evaluations: 6
+Threshold Failures: 0
+High-Risk Threshold Failures: 0
+Regressions: 0
+High-Risk Regressions: 0
+
+Release Decision: ALLOWED
+```
+
+The command returned:
+
+```text
+Exit Code: 0
+```
+
+and GitHub Actions passed again.
+
+### Key Lesson
+
+Traditional automated tests can pass while AI behavior still degrades.
+
+A production AI QA strategy should therefore include both:
+
+```text
+Deterministic Software Tests
++
+AI Evaluation Quality Gates
+```
+
+The framework can now automatically enforce AI quality standards during CI/CD rather than relying on manual evaluation.
+
