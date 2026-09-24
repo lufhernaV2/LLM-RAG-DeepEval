@@ -27,3 +27,9 @@ jobs:
       - name: Run deterministic pipeline tests
         run: |
           pytest tests/test_day17_evaluation_pipeline.py -v
+
+      - name: Run AI quality gate
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python -m scripts.run_quality_gate
