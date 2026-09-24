@@ -7,15 +7,18 @@ from evaluation.evaluation_pipeline import (
 )
 from evaluation.evaluation_policy import build_metrics_for_risk
 from evaluation.evaluation_results import evaluate_dataset_to_results
-from evaluation.rag_evaluation_runner import build_test_cases_from_goldens
-
+from evaluation.rag_evaluation_runner import (
+    build_test_cases_with_application,
+    run_simulated_rag_application_with_regression,
+)
 
 BASELINE_PATH = "baselines/northstar_baseline.json"
 
 
 def main():
-    test_cases = build_test_cases_from_goldens(
-        northstar_policy_goldens
+    test_cases = build_test_cases_with_application(
+    goldens=northstar_policy_goldens,
+    rag_application=run_simulated_rag_application_with_regression,
     )
 
     current_results = evaluate_dataset_to_results(
