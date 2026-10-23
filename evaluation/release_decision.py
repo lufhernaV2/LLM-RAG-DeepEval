@@ -10,6 +10,11 @@ from evaluation.regression_analysis import (
     get_high_risk_regressions,
 )
 
+from evaluation.evaluation_stability import (
+    CONFIRMED_FAILURE,
+    UNSTABLE,
+)
+
 @dataclass
 class ReleaseDecision:
     blocked: bool
@@ -30,8 +35,12 @@ def should_block_release_with_regressions(
 def build_release_decision(
     current_results,
     comparisons,
+    stability_results=None,
 ):
     reasons = []
+
+    if stability_results is None:
+        stability_results = []
 
     high_risk_failures = get_high_risk_failures(current_results)
 
@@ -49,6 +58,21 @@ def build_release_decision(
             f"{regression.category} / {regression.metric_name}"
         )
 
+    for stability_result in stability_results:
+        if stability_result.outcome == CONFIRMED_FAILURE:
+            reasons.append(
+                f"Confirmed evaluation failure: "
+                f"{stability_result.category} / "
+                f"{stability_result.metric_name}"
+            )
+
+        if stability_result.outcome == UNSTABLE:
+            reasons.append(
+                f"Unstable evaluation: "
+                f"{stability_result.category} / "
+                f"{stability_result.metric_name}"
+            )
+
     return ReleaseDecision(
         blocked=len(reasons) > 0,
         reasons=reasons,
@@ -57,7 +81,11 @@ def build_release_decision(
 def format_release_report(
     current_results,
     comparisons,
+    stability_results=None,
 ):
+    if stability_results is None:
+        stability_results = []
+
     failed_results = get_failed_results(current_results)
     high_risk_failures = get_high_risk_failures(current_results)
 
@@ -67,6 +95,7 @@ def format_release_report(
     decision = build_release_decision(
         current_results,
         comparisons,
+        stability_results=stability_results,
     )
 
     release_status = "BLOCKED" if decision.blocked else "ALLOWED"

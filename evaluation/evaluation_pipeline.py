@@ -14,12 +14,16 @@ class EvaluationPipelineResult:
     comparisons: list
     release_decision: object
     report: str
-
+    stability_results: list
 
 def run_evaluation_pipeline(
     current_results,
     baseline_path,
+    stability_results=None,
 ):
+    if stability_results is None:
+        stability_results = []
+
     baseline_results = load_baseline(baseline_path)
 
     comparisons = compare_evaluation_runs(
@@ -30,16 +34,19 @@ def run_evaluation_pipeline(
     decision = build_release_decision(
         current_results,
         comparisons,
+        stability_results=stability_results,
     )
 
     report = format_release_report(
         current_results,
         comparisons,
+        stability_results=stability_results,
     )
 
     return EvaluationPipelineResult(
         current_results=current_results,
         comparisons=comparisons,
+        stability_results=stability_results,
         release_decision=decision,
         report=report,
     )

@@ -894,3 +894,123 @@ AI Evaluation Quality Gates
 
 The framework can now automatically enforce AI quality standards during CI/CD rather than relying on manual evaluation.
 
+## Day 19 — Evaluation Stability & Targeted Confirmation
+
+Improved the AI quality gate so near-threshold LLM evaluation results can be handled more reliably without blindly retrying the entire test suite.
+
+### Implemented
+
+- Created `evaluation/evaluation_stability.py`
+- Added stability classifications:
+  - `CLEAR_PASS`
+  - `BORDERLINE`
+  - `CLEAR_FAILURE`
+- Added a configurable borderline margin around metric thresholds.
+- Added `get_borderline_results()` to identify only uncertain evaluations.
+- Added `ConfirmationRequest` for targeted reevaluation.
+- Added `EvaluationStabilityResult` to preserve:
+  - initial score
+  - confirmation score
+  - threshold
+  - final stability outcome
+- Added confirmation outcomes:
+  - `CONFIRMED_PASS`
+  - `CONFIRMED_FAILURE`
+  - `UNSTABLE`
+- Added targeted metric confirmation so only the uncertain metric is rerun.
+- Added automated targeted confirmations across an evaluation run.
+- Integrated stability evidence into:
+  - `ReleaseDecision`
+  - `EvaluationPipelineResult`
+  - human-readable release reports
+- Added a stability policy where confirmed failures and unstable results block automatic release.
+
+### Stability Policy
+
+```text
+Initial Evaluation
+        ↓
+CLEAR_PASS
+→ no confirmation
+
+CLEAR_FAILURE
+→ fail normally
+
+BORDERLINE
+→ run one targeted confirmation
+```
+
+Confirmation results are interpreted as:
+
+```text
+PASS + PASS
+→ CONFIRMED_PASS
+
+FAIL + FAIL
+→ CONFIRMED_FAILURE
+
+PASS + FAIL
+→ UNSTABLE
+```
+
+A confirmation is additional evidence, not a retry-until-pass mechanism.
+
+### Targeted Confirmation
+
+Instead of rerunning the full evaluation suite:
+
+```text
+6 metric evaluations
+        ↓
+1 borderline result
+        ↓
+rerun only that metric
+```
+
+This reduces evaluator cost, CI runtime, and unnecessary LLM variance.
+
+### Release Policy
+
+The release decision can now consider:
+
+```text
+Threshold Failures
+        +
+High-Risk Regressions
+        +
+Evaluation Stability
+        ↓
+Unified Release Decision
+```
+
+An unstable evaluation can block release even when the current score technically passes its threshold.
+
+Example:
+
+```text
+Initial Faithfulness:      0.89
+Confirmation Faithfulness: 1.00
+Threshold:                 0.90
+
+Outcome: UNSTABLE
+Release Decision: BLOCKED
+```
+
+### Final Healthy Run
+
+```text
+Metric Evaluations: 6
+Threshold Failures: 0
+High-Risk Threshold Failures: 0
+Regressions: 0
+High-Risk Regressions: 0
+
+Release Decision: ALLOWED
+Exit Code: 0
+```
+
+### Key Lesson
+
+A reliable AI quality gate must evaluate not only the application, but also the trustworthiness of its evaluation signals.
+
+Day 19 added a controlled stability layer that distinguishes real failures from potentially unstable near-threshold LLM evaluations while avoiding indiscriminate retries.

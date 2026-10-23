@@ -8,6 +8,7 @@ from evaluation.evaluation_pipeline import (
 from evaluation.evaluation_policy import build_metrics_for_risk
 from evaluation.evaluation_results import evaluate_dataset_to_results
 from evaluation.rag_evaluation_runner import build_test_cases_from_goldens
+from evaluation.evaluation_stability import run_targeted_confirmations
 
 BASELINE_PATH = "baselines/northstar_baseline.json"
 
@@ -23,9 +24,16 @@ def main():
         build_metrics_for_risk=build_metrics_for_risk,
     )
 
+    stability_results = run_targeted_confirmations(
+        current_results=current_results,
+        test_cases=test_cases,
+        build_metrics_for_risk=build_metrics_for_risk,
+    )
+
     pipeline_result = run_evaluation_pipeline(
         current_results=current_results,
         baseline_path=BASELINE_PATH,
+        stability_results=stability_results,
     )
 
     print()
